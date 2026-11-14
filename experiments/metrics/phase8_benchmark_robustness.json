@@ -1,0 +1,158 @@
+{
+  "benchmark_comparison_table": {
+    "Simple RNN": {
+      "accuracy": 0.3499,
+      "macro_f1": 0.0185,
+      "weighted_f1": 0.1814,
+      "total_parameters": 1276052,
+      "model_size_mb": 4.868,
+      "batch_latency_ms": 7.27,
+      "per_sample_latency_ms": 0.114,
+      "training_time_sec": 0.0
+    },
+    "LSTM": {
+      "accuracy": 0.5222,
+      "macro_f1": 0.3288,
+      "weighted_f1": 0.4867,
+      "total_parameters": 1364372,
+      "model_size_mb": 5.205,
+      "batch_latency_ms": 8.8,
+      "per_sample_latency_ms": 0.137,
+      "training_time_sec": 0.0
+    },
+    "GRU": {
+      "accuracy": 0.5198,
+      "macro_f1": 0.2488,
+      "weighted_f1": 0.4336,
+      "total_parameters": 1334932,
+      "model_size_mb": 5.092,
+      "batch_latency_ms": 23.03,
+      "per_sample_latency_ms": 0.36,
+      "training_time_sec": 0.0
+    },
+    "Transformer": {
+      "accuracy": 0.4821,
+      "macro_f1": 0.2649,
+      "weighted_f1": 0.4327,
+      "total_parameters": 1430740,
+      "model_size_mb": 5.458,
+      "batch_latency_ms": 28.18,
+      "per_sample_latency_ms": 0.44,
+      "training_time_sec": 0.0
+    }
+  },
+  "best_recurrent_model": "LSTM",
+  "mcnemar_statistical_test": {
+    "b_modelA_correct_modelB_wrong": 425,
+    "c_modelA_wrong_modelB_correct": 241,
+    "both_correct": 1972,
+    "both_wrong": 1952,
+    "chi2_statistic": 50.2838,
+    "p_value": 1.3304912727107876e-12,
+    "p_value_formatted": "1.330491e-12",
+    "is_statistically_significant_at_05": true
+  },
+  "noise_robustness_experiment": {
+    "noise_rates": [
+      0.0,
+      0.05,
+      0.1,
+      0.2,
+      0.3
+    ],
+    "models": {
+      "Simple RNN": {
+        "noise_rates": [
+          0.0,
+          0.05,
+          0.1,
+          0.2,
+          0.3
+        ],
+        "accuracies": [
+          0.3499,
+          0.3499,
+          0.3499,
+          0.3499,
+          0.3499
+        ],
+        "macro_f1s": [
+          0.0185,
+          0.0185,
+          0.0185,
+          0.0185,
+          0.0185
+        ]
+      },
+      "LSTM": {
+        "noise_rates": [
+          0.0,
+          0.05,
+          0.1,
+          0.2,
+          0.3
+        ],
+        "accuracies": [
+          0.5222,
+          0.5131,
+          0.5035,
+          0.4915,
+          0.4682
+        ],
+        "macro_f1s": [
+          0.3288,
+          0.3194,
+          0.3079,
+          0.2887,
+          0.2596
+        ]
+      },
+      "GRU": {
+        "noise_rates": [
+          0.0,
+          0.05,
+          0.1,
+          0.2,
+          0.3
+        ],
+        "accuracies": [
+          0.5198,
+          0.5098,
+          0.502,
+          0.4865,
+          0.4721
+        ],
+        "macro_f1s": [
+          0.2488,
+          0.2397,
+          0.2352,
+          0.2165,
+          0.2061
+        ]
+      },
+      "Transformer": {
+        "noise_rates": [
+          0.0,
+          0.05,
+          0.1,
+          0.2,
+          0.3
+        ],
+        "accuracies": [
+          0.4821,
+          0.4786,
+          0.4719,
+          0.461,
+          0.4449
+        ],
+        "macro_f1s": [
+          0.2649,
+          0.2591,
+          0.2515,
+          0.2333,
+          0.2113
+        ]
+      }
+    }
+  }
+}
