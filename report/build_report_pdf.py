@@ -64,8 +64,8 @@ class ResearchReportPDF(FPDF):
             self.body_paragraph(f"[Figure missing: {img_path}]")
 
 def generate_pdf_report(
-    student_name: str = "[Student Name]",
-    roll_no: str = "[i22-xxxx]",
+    student_name: str = "Hamza Khurram",
+    roll_no: str = "i210735",
     output_path: str = "report.pdf"
 ):
     pdf = ResearchReportPDF(orientation='P', unit='mm', format='A4')

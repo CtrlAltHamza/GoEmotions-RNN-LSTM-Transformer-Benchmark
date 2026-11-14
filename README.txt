@@ -3,9 +3,9 @@ CS4045 - Deep Learning for Perception (Fall 2026)
 Assignment #3: Emotion Classification Using RNN, LSTM, GRU and Transformer
 Instructor: Dr. Ahmad Raza Shahid
 --------------------------------------------------------------------------------
-Student Name: [Your Name]
-Roll Number:  [i22-xxxx]
-Submission:   i22xxxx_name_A3.zip
+Student Name: Hamza Khurram
+Roll Number:  i210735
+Submission:   i210735_Hamza_Khurram_A3.zip
 ================================================================================
 
 1. PROJECT OVERVIEW

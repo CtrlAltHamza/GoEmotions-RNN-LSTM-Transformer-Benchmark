@@ -12,7 +12,7 @@ ENV/
 .pytest_cache/
 
 # Data and large weights
-data/raw/
+data/
 *.pt
 *.pth
 *.bin
@@ -22,6 +22,7 @@ data/raw/
 # MLflow tracking db & artifacts
 mlruns/
 .mlflow/
+mlflow.db
 
 # OS specific
 Thumbs.db

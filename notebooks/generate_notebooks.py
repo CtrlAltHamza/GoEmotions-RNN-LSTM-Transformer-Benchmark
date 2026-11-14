@@ -9,8 +9,8 @@ import nbformat as nbf
 STUDENT_METADATA_MD = """# CS4045 - Deep Learning for Perception
 ## Assignment #3: Emotion Classification Using RNN, LSTM, GRU and Transformer
 **Instructor:** Dr. Ahmad Raza Shahid  
-**Student Name:** [Your Name]  
-**Roll Number:** [i22-xxxx]  
+**Student Name:** Hamza Khurram  
+**Roll Number:** i210735  
 **Reproducibility:** Seed = 42 | Device: Auto (CUDA if available, else CPU)  
 ---
 """

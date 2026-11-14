@@ -63,9 +63,7 @@ class GoEmotionsDataset(Dataset):
             self.encoded_data.append({
                 'input_ids': torch.tensor(encoded, dtype=torch.long),
                 'label': torch.tensor(item['label'], dtype=torch.long),
-                'length': min(len(tokens), max_len),
-                'text': item['text'],
-                'tokens': tokens[:max_len]
+                'length': torch.tensor(min(len(tokens), max_len), dtype=torch.long)
             })
 
     def __len__(self):
