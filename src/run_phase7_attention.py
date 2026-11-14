@@ -16,6 +16,7 @@ from src.utils.mlops_tracker import MLOpsTracker
 
 def run_phase7():
     set_seed(42)
+    torch.set_num_threads(4)
     device = get_device()
     tracker = MLOpsTracker()
     tracker.start_run(run_name="Phase7_Attention_Analysis", phase="Phase7")

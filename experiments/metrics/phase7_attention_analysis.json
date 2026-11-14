@@ -1,0 +1,105 @@
+{
+  "visualized_samples": [
+    {
+      "text": "I didn't know that, thank you for teaching me something today!",
+      "tokens": [
+        "i",
+        "didn't",
+        "know",
+        "that",
+        ",",
+        "thank",
+        "you",
+        "for",
+        "teaching",
+        "me",
+        "something",
+        "today",
+        "!"
+      ],
+      "true_label": "gratitude",
+      "pred_label": "gratitude",
+      "confidence": 0.987,
+      "is_correct": true
+    },
+    {
+      "text": "Translation }}} I wish I could afford it.",
+      "tokens": [
+        "translation",
+        "}",
+        "}",
+        "}",
+        "i",
+        "wish",
+        "i",
+        "could",
+        "afford",
+        "it",
+        "."
+      ],
+      "true_label": "desire",
+      "pred_label": "desire",
+      "confidence": 0.93,
+      "is_correct": true
+    },
+    {
+      "text": "It's wonderful because it's awful. At not with.",
+      "tokens": [
+        "it's",
+        "wonderful",
+        "because",
+        "it's",
+        "awful",
+        ".",
+        "at",
+        "not",
+        "with",
+        "."
+      ],
+      "true_label": "admiration",
+      "pred_label": "disapproval",
+      "confidence": 0.419,
+      "is_correct": false
+    },
+    {
+      "text": "100%! Congrats on your job too!",
+      "tokens": [
+        "100",
+        "%",
+        "!",
+        "congrats",
+        "on",
+        "your",
+        "job",
+        "too",
+        "!"
+      ],
+      "true_label": "gratitude",
+      "pred_label": "admiration",
+      "confidence": 0.619,
+      "is_correct": false
+    }
+  ],
+  "ablation_experiment": {
+    "k": [
+      1,
+      2,
+      3
+    ],
+    "top_attended": [
+      62.2,
+      54.2,
+      52.6
+    ],
+    "random_words": [
+      93.33,
+      88.0,
+      82.13
+    ],
+    "bottom_attended": [
+      97.4,
+      95.4,
+      93.8
+    ]
+  }
+}
