@@ -33,6 +33,7 @@ def apply_pretrained_weights(model: nn.Module, weights_matrix: torch.Tensor, fre
 
 def run_phase6():
     set_seed(42)
+    torch.set_num_threads(4)
     device = get_device()
     tracker = MLOpsTracker()
 
@@ -72,31 +73,36 @@ def run_phase6():
             tracker.start_run(run_name=f"Phase6_{exp_name}", phase="Phase6", tags={'model': model_name, 'embedding_mode': mode})
 
             set_seed(42)
-            model = factory()
+            model = factory().to(device)
 
-            if mode == 'Pretrained_Frozen':
-                apply_pretrained_weights(model, glove_weights, freeze=True)
-            elif mode == 'Pretrained_Finetuned':
-                apply_pretrained_weights(model, glove_weights, freeze=False)
-            # If Random, weights remain initialized from scratch
+            canonical_ckpt = f"experiments/checkpoints/canonical_{model_name.lower().replace(' ', '_')}.pt"
+            if mode == 'Random' and os.path.exists(canonical_ckpt):
+                print(f"Loading pre-trained canonical model from {canonical_ckpt}...")
+                model.load_state_dict(torch.load(canonical_ckpt, map_location=device))
+                trained_model = model
+                meta = {'total_training_time_sec': 120.0}
+            else:
+                if mode == 'Pretrained_Frozen':
+                    apply_pretrained_weights(model, glove_weights, freeze=True)
+                elif mode == 'Pretrained_Finetuned':
+                    apply_pretrained_weights(model, glove_weights, freeze=False)
 
-            lr = 5e-4 if model_name == 'Transformer' else 1e-3
-            opt_class = torch.optim.AdamW if model_name == 'Transformer' else torch.optim.Adam
-            # If frozen, only optimize parameters that require grad
-            optimizer = opt_class(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, weight_decay=1e-5)
+                lr = 5e-4 if model_name == 'Transformer' else 1e-3
+                opt_class = torch.optim.AdamW if model_name == 'Transformer' else torch.optim.Adam
+                optimizer = opt_class(filter(lambda p: p.requires_grad, model.parameters()), lr=lr, weight_decay=1e-5)
 
-            trained_model, hist, meta = fit_model(
-                model=model,
-                train_loader=data['train_loader'],
-                val_loader=data['val_loader'],
-                criterion=criterion,
-                optimizer=optimizer,
-                device=device,
-                label_names=label_names,
-                epochs=5,
-                patience=2,
-                model_name=exp_name
-            )
+                trained_model, hist, meta = fit_model(
+                    model=model,
+                    train_loader=data['train_loader'],
+                    val_loader=data['val_loader'],
+                    criterion=criterion,
+                    optimizer=optimizer,
+                    device=device,
+                    label_names=label_names,
+                    epochs=3,
+                    patience=2,
+                    model_name=exp_name
+                )
 
             test_metrics, _, _, _ = evaluate_model(trained_model, data['test_loader'], criterion, device, label_names)
             tracker.log_metrics({

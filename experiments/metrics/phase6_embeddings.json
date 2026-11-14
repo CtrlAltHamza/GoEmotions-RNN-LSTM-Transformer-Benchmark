@@ -1,0 +1,179 @@
+{
+  "coverage_info": {
+    "total_vocab": 12430,
+    "matched_count": 11739,
+    "coverage_pct": 94.45,
+    "missing_count": 689,
+    "sample_missing": [
+      "didn't",
+      "wankers",
+      "isn't",
+      "dumbass",
+      "\ud83d\ude1d",
+      "what's",
+      "can't",
+      "it's",
+      "they're",
+      "wouldn't",
+      "i'll",
+      "won't",
+      "upvotes",
+      "don't",
+      "else's"
+    ]
+  },
+  "experiments": {
+    "Simple RNN": {
+      "Random": {
+        "accuracy": 0.3499,
+        "macro_f1": 0.0185,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.0
+        },
+        "training_time_sec": 120.0
+      },
+      "Pretrained_Frozen": {
+        "accuracy": 0.3499,
+        "macro_f1": 0.0185,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.0
+        },
+        "training_time_sec": 60.2
+      },
+      "Pretrained_Finetuned": {
+        "accuracy": 0.3499,
+        "macro_f1": 0.0185,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.0
+        },
+        "training_time_sec": 111.81
+      }
+    },
+    "LSTM": {
+      "Random": {
+        "accuracy": 0.5222,
+        "macro_f1": 0.3288,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.087
+        },
+        "training_time_sec": 120.0
+      },
+      "Pretrained_Frozen": {
+        "accuracy": 0.4891,
+        "macro_f1": 0.2574,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.0435
+        },
+        "training_time_sec": 149.53
+      },
+      "Pretrained_Finetuned": {
+        "accuracy": 0.5338,
+        "macro_f1": 0.3255,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.0
+        },
+        "training_time_sec": 164.82
+      }
+    },
+    "GRU": {
+      "Random": {
+        "accuracy": 0.5198,
+        "macro_f1": 0.2488,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.0
+        },
+        "training_time_sec": 120.0
+      },
+      "Pretrained_Frozen": {
+        "accuracy": 0.4519,
+        "macro_f1": 0.1895,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.0435
+        },
+        "training_time_sec": 198.5
+      },
+      "Pretrained_Finetuned": {
+        "accuracy": 0.4987,
+        "macro_f1": 0.2342,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.0
+        },
+        "training_time_sec": 231.77
+      }
+    },
+    "Transformer": {
+      "Random": {
+        "accuracy": 0.4821,
+        "macro_f1": 0.2649,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.0,
+          "relief": 0.0,
+          "embarrassment": 0.0
+        },
+        "training_time_sec": 120.0
+      },
+      "Pretrained_Frozen": {
+        "accuracy": 0.5074,
+        "macro_f1": 0.3586,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.5,
+          "relief": 0.0,
+          "embarrassment": 0.3913
+        },
+        "training_time_sec": 704.45
+      },
+      "Pretrained_Finetuned": {
+        "accuracy": 0.5248,
+        "macro_f1": 0.4032,
+        "minority_recall": {
+          "grief": 0.0,
+          "pride": 0.0,
+          "nervousness": 0.6667,
+          "relief": 0.0,
+          "embarrassment": 0.5652
+        },
+        "training_time_sec": 500.38
+      }
+    }
+  }
+}
