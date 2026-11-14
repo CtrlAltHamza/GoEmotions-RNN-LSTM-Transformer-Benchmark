@@ -1,0 +1,299 @@
+{
+  "label_names": [
+    "admiration",
+    "amusement",
+    "anger",
+    "annoyance",
+    "approval",
+    "caring",
+    "confusion",
+    "curiosity",
+    "desire",
+    "disappointment",
+    "disapproval",
+    "disgust",
+    "embarrassment",
+    "excitement",
+    "fear",
+    "gratitude",
+    "grief",
+    "joy",
+    "love",
+    "nervousness",
+    "optimism",
+    "pride",
+    "realization",
+    "relief",
+    "remorse",
+    "sadness",
+    "surprise",
+    "neutral"
+  ],
+  "filtering_stats": {
+    "train": {
+      "total_original": 43410,
+      "single_label_kept": 36308,
+      "multi_label_removed": 7102,
+      "zero_label_removed": 0,
+      "total_removed": 7102,
+      "pct_removed": 16.36
+    },
+    "validation": {
+      "total_original": 5426,
+      "single_label_kept": 4548,
+      "multi_label_removed": 878,
+      "zero_label_removed": 0,
+      "total_removed": 878,
+      "pct_removed": 16.18
+    },
+    "test": {
+      "total_original": 5427,
+      "single_label_kept": 4590,
+      "multi_label_removed": 837,
+      "zero_label_removed": 0,
+      "total_removed": 837,
+      "pct_removed": 15.42
+    }
+  },
+  "class_distribution": [
+    {
+      "class_id": 0,
+      "class_name": "admiration",
+      "count": 2710,
+      "percentage": 7.464
+    },
+    {
+      "class_id": 1,
+      "class_name": "amusement",
+      "count": 1652,
+      "percentage": 4.55
+    },
+    {
+      "class_id": 2,
+      "class_name": "anger",
+      "count": 1025,
+      "percentage": 2.823
+    },
+    {
+      "class_id": 3,
+      "class_name": "annoyance",
+      "count": 1451,
+      "percentage": 3.996
+    },
+    {
+      "class_id": 4,
+      "class_name": "approval",
+      "count": 1873,
+      "percentage": 5.159
+    },
+    {
+      "class_id": 5,
+      "class_name": "caring",
+      "count": 649,
+      "percentage": 1.787
+    },
+    {
+      "class_id": 6,
+      "class_name": "confusion",
+      "count": 858,
+      "percentage": 2.363
+    },
+    {
+      "class_id": 7,
+      "class_name": "curiosity",
+      "count": 1389,
+      "percentage": 3.826
+    },
+    {
+      "class_id": 8,
+      "class_name": "desire",
+      "count": 389,
+      "percentage": 1.071
+    },
+    {
+      "class_id": 9,
+      "class_name": "disappointment",
+      "count": 709,
+      "percentage": 1.953
+    },
+    {
+      "class_id": 10,
+      "class_name": "disapproval",
+      "count": 1402,
+      "percentage": 3.861
+    },
+    {
+      "class_id": 11,
+      "class_name": "disgust",
+      "count": 498,
+      "percentage": 1.372
+    },
+    {
+      "class_id": 12,
+      "class_name": "embarrassment",
+      "count": 203,
+      "percentage": 0.559
+    },
+    {
+      "class_id": 13,
+      "class_name": "excitement",
+      "count": 510,
+      "percentage": 1.405
+    },
+    {
+      "class_id": 14,
+      "class_name": "fear",
+      "count": 430,
+      "percentage": 1.184
+    },
+    {
+      "class_id": 15,
+      "class_name": "gratitude",
+      "count": 1857,
+      "percentage": 5.115
+    },
+    {
+      "class_id": 16,
+      "class_name": "grief",
+      "count": 39,
+      "percentage": 0.107
+    },
+    {
+      "class_id": 17,
+      "class_name": "joy",
+      "count": 853,
+      "percentage": 2.349
+    },
+    {
+      "class_id": 18,
+      "class_name": "love",
+      "count": 1427,
+      "percentage": 3.93
+    },
+    {
+      "class_id": 19,
+      "class_name": "nervousness",
+      "count": 85,
+      "percentage": 0.234
+    },
+    {
+      "class_id": 20,
+      "class_name": "optimism",
+      "count": 861,
+      "percentage": 2.371
+    },
+    {
+      "class_id": 21,
+      "class_name": "pride",
+      "count": 51,
+      "percentage": 0.14
+    },
+    {
+      "class_id": 22,
+      "class_name": "realization",
+      "count": 586,
+      "percentage": 1.614
+    },
+    {
+      "class_id": 23,
+      "class_name": "relief",
+      "count": 88,
+      "percentage": 0.242
+    },
+    {
+      "class_id": 24,
+      "class_name": "remorse",
+      "count": 353,
+      "percentage": 0.972
+    },
+    {
+      "class_id": 25,
+      "class_name": "sadness",
+      "count": 817,
+      "percentage": 2.25
+    },
+    {
+      "class_id": 26,
+      "class_name": "surprise",
+      "count": 720,
+      "percentage": 1.983
+    },
+    {
+      "class_id": 27,
+      "class_name": "neutral",
+      "count": 12823,
+      "percentage": 35.317
+    }
+  ],
+  "imbalance_ratio": 328.79,
+  "sequence_lengths": {
+    "min": 1,
+    "mean": 15.37,
+    "median": 15.0,
+    "p50": 15.0,
+    "p75": 21.0,
+    "p90": 27.0,
+    "p95": 29.0,
+    "p98": 30.0,
+    "p99": 32.0,
+    "p99.9": 37.0,
+    "max": 485
+  },
+  "recommended_max_len": 50,
+  "vocab_thresholds": {
+    "min_freq_1": 24999,
+    "min_freq_2": 12428,
+    "min_freq_3": 8877,
+    "min_freq_5": 5917
+  },
+  "val_oov_pct": 3.68,
+  "test_oov_pct": 3.76,
+  "confusion_expectations": [
+    {
+      "cluster": "Affection & Praise",
+      "emotions": [
+        "admiration",
+        "approval",
+        "pride"
+      ],
+      "reason": "All convey strong positive endorsement; subtle semantic boundary between admiring someone else and approving an idea."
+    },
+    {
+      "cluster": "Happiness & Exuberance",
+      "emotions": [
+        "joy",
+        "amusement",
+        "excitement",
+        "love"
+      ],
+      "reason": "Short Reddit comments frequently mix laughter (amusement) with joy and affection (love)."
+    },
+    {
+      "cluster": "Negative Aggression",
+      "emotions": [
+        "anger",
+        "annoyance",
+        "disgust"
+      ],
+      "reason": "Annoyance is a milder variant of anger; both share hostile phrasing, exclamation, and sarcasm."
+    },
+    {
+      "cluster": "Anxiety & Threat",
+      "emotions": [
+        "fear",
+        "nervousness"
+      ],
+      "reason": "Both reflect physiological anticipation of negative outcomes with overlapping vocabulary ('scared', 'worried', 'nervous')."
+    },
+    {
+      "cluster": "Sorrow & Regret",
+      "emotions": [
+        "sadness",
+        "disappointment",
+        "remorse",
+        "grief"
+      ],
+      "reason": "Disappointment and remorse frequently co-occur with sadness and melancholic expressions."
+    }
+  ]
+}

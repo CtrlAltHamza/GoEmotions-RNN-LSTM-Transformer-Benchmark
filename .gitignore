@@ -1,0 +1,40 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caching and virtual environments
+.venv/
+env/
+venv/
+ENV/
+.cache/
+.pytest_cache/
+
+# Data and large weights
+data/raw/
+*.pt
+*.pth
+*.bin
+*.tar.gz
+*.zip
+
+# MLflow tracking db & artifacts
+mlruns/
+.mlflow/
+
+# OS specific
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# LaTeX temporary build files
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
