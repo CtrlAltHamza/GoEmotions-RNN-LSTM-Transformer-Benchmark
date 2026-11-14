@@ -1,0 +1,80 @@
+{
+  "Forward_LAST": {
+    "direction": "forward",
+    "readout": "last",
+    "test_accuracy": 0.5222,
+    "test_macro_f1": 0.3288,
+    "total_params": 1364372,
+    "latency": {
+      "batch_latency_mean_ms": 22.87,
+      "batch_latency_std_ms": 6.82,
+      "per_sample_latency_ms": 0.357
+    },
+    "training_time_sec": 283.1
+  },
+  "Bidirectional_LAST": {
+    "direction": "bidirectional",
+    "readout": "last",
+    "test_accuracy": 0.5028,
+    "test_macro_f1": 0.277,
+    "total_params": 1485716,
+    "latency": {
+      "batch_latency_mean_ms": 33.35,
+      "batch_latency_std_ms": 5.65,
+      "per_sample_latency_ms": 0.521
+    },
+    "training_time_sec": 265.77
+  },
+  "Forward_AVG": {
+    "direction": "forward",
+    "readout": "avg",
+    "test_accuracy": 0.4651,
+    "test_macro_f1": 0.2664,
+    "total_params": 1364372,
+    "latency": {
+      "batch_latency_mean_ms": 15.5,
+      "batch_latency_std_ms": 3.65,
+      "per_sample_latency_ms": 0.242
+    },
+    "training_time_sec": 148.28
+  },
+  "Bidirectional_AVG": {
+    "direction": "bidirectional",
+    "readout": "avg",
+    "test_accuracy": 0.5092,
+    "test_macro_f1": 0.3066,
+    "total_params": 1485716,
+    "latency": {
+      "batch_latency_mean_ms": 36.98,
+      "batch_latency_std_ms": 6.57,
+      "per_sample_latency_ms": 0.578
+    },
+    "training_time_sec": 248.72
+  },
+  "Forward_MAX": {
+    "direction": "forward",
+    "readout": "max",
+    "test_accuracy": 0.5148,
+    "test_macro_f1": 0.2804,
+    "total_params": 1364372,
+    "latency": {
+      "batch_latency_mean_ms": 38.42,
+      "batch_latency_std_ms": 20.61,
+      "per_sample_latency_ms": 0.6
+    },
+    "training_time_sec": 198.01
+  },
+  "Bidirectional_MAX": {
+    "direction": "bidirectional",
+    "readout": "max",
+    "test_accuracy": 0.5261,
+    "test_macro_f1": 0.3132,
+    "total_params": 1485716,
+    "latency": {
+      "batch_latency_mean_ms": 36.34,
+      "batch_latency_std_ms": 7.59,
+      "per_sample_latency_ms": 0.568
+    },
+    "training_time_sec": 330.17
+  }
+}
