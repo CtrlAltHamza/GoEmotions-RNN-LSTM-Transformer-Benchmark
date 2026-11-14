@@ -184,19 +184,19 @@ def generate_pdf_report(
     pdf.chapter_title('6. Phase 5: Sequence Readout and Direction (LSTM Study)')
     pdf.body_paragraph(
         "Using the retrained LSTM, we systematically evaluated 6 configurations: [Last State, Average Pooling, Max Pooling] x "
-        "[Forward-only, Bidirectional]. Bidirectional processing with Average Pooling achieved the highest macro-F1, confirming "
-        "that aggregating representations across both forward and backward contexts captures distributed affective sentiment far more "
-        "effectively than indexing only the terminal token."
+        "[Forward-only, Bidirectional]. Forward-only with Last State readout achieved the highest macro-F1 (0.3288), while "
+        "Bidirectional with Max Pooling achieved 0.3132. The results confirm that sequence readout selection plays a crucial role "
+        "in affective sentence summarization."
     )
     pdf.insert_figure('experiments/figures/phase5_readout_direction.png', 'Figure 7: Comparison across the 6 readout and direction configurations.', width=165)
 
     # 7. Phase 6: Word Representation (GloVe Embeddings)
     pdf.chapter_title('7. Phase 6: Word Representation: Random vs Pretrained GloVe')
     pdf.body_paragraph(
-        "Pretrained GloVe 100d vectors were aligned with our vocabulary, achieving 88.42% vocabulary coverage. Missing tokens "
-        "consisted primarily of Reddit slang ('lmao', 'soooo', 'smh', 'bruh') and non-standard contractions. "
-        "Fine-tuned GloVe embeddings yielded the highest performance across all models, providing semantic inductive priors "
-        "that accelerated convergence and prevented overfitting on minority classes."
+        "Pretrained GloVe 100d vectors were aligned with our vocabulary, achieving 94.45% vocabulary coverage (11,739 matched words). "
+        "Missing tokens consisted primarily of Reddit slang ('[emoji]', 'dumbass', 'wankers') and informal contractions ('didn\'t', 'what\'s'). "
+        "Fine-tuned GloVe embeddings yielded the highest performance across all models (Transformer Macro-F1 reaching 0.4049 and "
+        "LSTM reaching 0.3424), providing strong semantic inductive priors that accelerated convergence."
     )
     pdf.insert_figure('experiments/figures/phase6_embedding_comparison.png', 'Figure 8: Performance gains across Random, Frozen, and Fine-Tuned GloVe embeddings.', width=170)
 
@@ -204,10 +204,11 @@ def generate_pdf_report(
     pdf.chapter_title('8. Phase 7: Attention Interpretability & Token Ablation')
     pdf.body_paragraph(
         "We visualized multi-head attention maps for correctly and wrongly classified comments. In correctly classified examples, "
-        "the model concentrated strong attention weights directly on emotion-bearing keywords (e.g. 'thank', 'horrible', 'congrats'). "
+        "the model concentrated strong attention weights directly on emotion-bearing keywords (e.g. 'thank', 'wish'). "
         "To scientifically verify attention fidelity, we conducted a controlled ablation study on 500 test instances, masking top-k "
-        "attended tokens vs. random tokens vs. bottom-attended tokens. Masking top-attended tokens caused a catastrophic accuracy drop "
-        "(>35%), whereas masking random or bottom tokens caused negligible degradation, proving that the Transformer faithfully bases "
+        "attended tokens vs. random tokens vs. bottom-attended tokens. Masking top-attended tokens caused a precipitous accuracy drop "
+        "(falling from 100% to 62.20% at k=1, 54.20% at k=2, and 52.60% at k=3), whereas masking random tokens (93.33%, 88.00%, 82.13%) "
+        "or bottom tokens (97.40%, 95.40%, 93.80%) preserved high accuracy. This confirms that the Transformer faithfully bases "
         "its decisions on the attended words."
     )
     pdf.insert_figure('experiments/figures/phase7_attention_heatmaps.png', 'Figure 9: Transformer multi-head attention heatmaps for correct and misclassified comments.', width=170)
@@ -216,10 +217,11 @@ def generate_pdf_report(
     # 9. Phase 8: Benchmarking & Noise Robustness
     pdf.chapter_title('9. Phase 8: Benchmarking, Statistical Significance & Robustness')
     pdf.body_paragraph(
-        "We benchmarked all four models across Accuracy, Macro-F1, Parameter Count, Memory Footprint, and Inference Latency. "
-        "A two-sided McNemar statistical significance test with continuity correction between the best recurrent model (Bidirectional LSTM) "
-        "and the Scratch Transformer yielded chi2 = 10.84 (p = 0.00099), confirming that the Transformer's superiority is statistically "
-        "significant (p < 0.001)."
+        "We benchmarked all four models across Accuracy, Macro-F1, Parameter Count, Memory Footprint, and Inference Latency: "
+        "Simple RNN (Acc=0.3499, F1=0.0185, 1.28M params), LSTM (Acc=0.5222, F1=0.3288, 1.36M params), GRU (Acc=0.5198, F1=0.2488, 1.33M params), "
+        "and Transformer (Acc=0.4821, F1=0.2649, 1.43M params). "
+        "A two-sided McNemar statistical significance test with continuity correction between the best recurrent model (LSTM) "
+        "and the scratch Transformer yielded chi2 = 50.2838 (p = 1.33e-12 < 0.001), establishing statistical significance."
     )
     pdf.body_paragraph(
         "Under test-time noise injection (0% to 30% typo/swap/deletion corruption without retraining), recurrent models degraded steeply "

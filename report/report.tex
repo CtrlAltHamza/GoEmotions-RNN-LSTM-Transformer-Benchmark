@@ -174,9 +174,9 @@ Table \ref{tab:phase2} contrasts Simple RNN, LSTM, and GRU baselines trained wit
 \toprule
 \textbf{Model} & \textbf{Params} & \textbf{Test Acc} & \textbf{Macro-F1} & \textbf{Time (s)} \\
 \midrule
-Simple RNN & 1,276,444 & 0.4412 & 0.2185 & 82.4 \\
-LSTM       & 1,360,348 & 0.4937 & 0.3120 & 118.6 \\
-GRU        & 1,332,380 & 0.5015 & 0.3204 & 109.2 \\
+Simple RNN & 1,276,052 & 0.3499 & 0.0185 & 65.7 \\
+LSTM       & 1,364,372 & 0.5377 & 0.2570 & 222.9 \\
+GRU        & 1,334,932 & 0.5425 & 0.2694 & 485.2 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -191,7 +191,7 @@ GRU        & 1,332,380 & 0.5015 & 0.3204 & 109.2 \\
 The Simple RNN suffers from severe vanishing gradients over longer contexts, plateauing at a macro-F1 of 0.2185. In contrast, LSTM and GRU leverage multiplicative gating to preserve long-range dependencies, boosting macro-F1 by nearly 10 points. GRU achieves marginally higher efficiency and accuracy over LSTM due to its streamlined parameterization.
 
 \subsection{Phase 3: Transformer Encoder from Scratch}
-The scratch Transformer classifier achieves 0.5126 test accuracy and 0.3348 macro-F1 with 1,353,244 parameters, outperforming all recurrent baselines without pretraining.
+The scratch Transformer classifier achieves 0.5331 test accuracy and 0.2603 macro-F1 with 1,430,740 parameters, outperforming Vanilla RNN without pretraining.
 
 \begin{figure}[H]
     \centering
@@ -210,11 +210,11 @@ Table \ref{tab:phase4} presents the comparative analysis between unweighted Cros
 \label{tab:phase4}
 \begin{tabular}{lccc}
 \toprule
-\textbf{Strategy} & \textbf{Test Acc} & \textbf{Macro-F1} & \textbf{Minority Recall} \\
+\textbf{Strategy} & \textbf{Test Acc} & \textbf{Macro-F1} & \textbf{Macro-Recall} \\
 \midrule
-Standard CE (Baseline) & \textbf{0.4937} & 0.3120 & 0.082 \\
-Class-Weighted CE      & 0.4682 & \textbf{0.3745} & \textbf{0.346} \\
-Focal Loss ($\gamma=2$)& 0.4810 & 0.3421 & 0.218 \\
+Standard CE (Baseline) & \textbf{0.5377} & 0.2570 & 0.2511 \\
+Class-Weighted CE      & 0.5222 & \textbf{0.3288} & \textbf{0.3310} \\
+Focal Loss ($\gamma=2$)& 0.5425 & 0.2764 & 0.2728 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -226,10 +226,10 @@ Focal Loss ($\gamma=2$)& 0.4810 & 0.3421 & 0.218 \\
     \label{fig:minority_recall}
 \end{figure}
 
-Standard Cross-Entropy yields inflated global accuracy but collapses on minority classes (\texttt{grief} recall = 0.00, \texttt{pride} recall = 0.04). Class-Weighted Cross-Entropy provides the optimal balance, increasing macro-F1 from 0.3120 to 0.3745 and elevating minority recall by $>4\times$. Consequently, Class-Weighted Cross-Entropy was selected to retrain the four canonical architectures.
+Standard Cross-Entropy yields inflated global accuracy but collapses on minority classes. Class-Weighted Cross-Entropy provides the optimal balance, increasing macro-F1 from 0.2570 to 0.3288 and elevating minority recall significantly. Consequently, Class-Weighted Cross-Entropy was selected to retrain the four canonical architectures.
 
 \subsection{Phase 5: Sequence Readout \& Direction (LSTM Study)}
-Evaluating the six combinations of pooling and direction in Table \ref{tab:phase5} demonstrates that Bidirectional reading combined with Average Pooling yields the strongest semantic representation.
+Evaluating the six combinations of pooling and direction in Table \ref{tab:phase5} demonstrates the trade-offs between directional processing and pooling strategies.
 
 \begin{table}[H]
 \centering
@@ -240,12 +240,12 @@ Evaluating the six combinations of pooling and direction in Table \ref{tab:phase
 \toprule
 \textbf{Direction} & \textbf{Readout} & \textbf{Test Acc} & \textbf{Macro-F1} & \textbf{Latency (ms)} \\
 \midrule
-Forward & Last State & 0.4682 & 0.3745 & 14.2 \\
-Forward & Average    & 0.4795 & 0.3882 & 14.5 \\
-Forward & Max        & 0.4710 & 0.3791 & 14.6 \\
-Bidirectional & Last State & 0.4764 & 0.3840 & 24.8 \\
-Bidirectional & Average    & \textbf{0.4891} & \textbf{0.4012} & 25.1 \\
-Bidirectional & Max        & 0.4820 & 0.3925 & 25.3 \\
+Forward & Last State & 0.5222 & \textbf{0.3288} & 22.87 \\
+Forward & Average    & 0.4651 & 0.2664 & 15.50 \\
+Forward & Max        & 0.5148 & 0.2804 & 38.42 \\
+Bidirectional & Last State & 0.5028 & 0.2770 & 33.35 \\
+Bidirectional & Average    & 0.5092 & 0.3066 & 36.98 \\
+Bidirectional & Max        & \textbf{0.5261} & 0.3132 & 36.34 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -258,7 +258,7 @@ Bidirectional & Max        & 0.4820 & 0.3925 & 25.3 \\
 \end{figure}
 
 \subsection{Phase 6: Word Representations (Random vs Pretrained GloVe)}
-Matching training vocabulary tokens against GloVe 100d embeddings yielded an 88.42\% coverage rate (10,989 matched tokens). Unmatched tokens predominantly consisted of Reddit internet slang, character elongations (e.g., ``soooo'', ``lmao'', ``smh''), and domain contractions.
+Matching training vocabulary tokens against GloVe 100d embeddings yielded a 94.45\% coverage rate (11,739 matched tokens). Unmatched tokens predominantly consisted of Reddit internet slang, non-standard tokens (e.g., ``dumbass'', ``wankers''), and informal contractions.
 
 \begin{figure}[H]
     \centering
@@ -267,7 +267,7 @@ Matching training vocabulary tokens against GloVe 100d embeddings yielded an 88.
     \label{fig:p6_embeddings}
 \end{figure}
 
-Fine-tuned GloVe embeddings deliver substantial gains across all four architectures, providing semantic priors that prevent overfitting on low-frequency emotion categories.
+Fine-tuned GloVe embeddings deliver substantial gains across architectures (Transformer Macro-F1 reaching 0.4049 and LSTM reaching 0.3424), providing semantic inductive priors that prevent overfitting on low-frequency emotion categories.
 
 \subsection{Phase 7: Attention Visualization \& Ablation Fidelity}
 Figure \ref{fig:p7_heatmaps} illustrates multi-head attention weight distributions across correctly classified and misclassified comments.
@@ -286,7 +286,7 @@ Figure \ref{fig:p7_heatmaps} illustrates multi-head attention weight distributio
     \label{fig:p7_ablation}
 \end{figure}
 
-The token importance ablation experiment confirms that masking the top-attended tokens causes a rapid degradation in classification accuracy (dropping by $>35\%$ with $k=3$ tokens masked), whereas masking random or bottom-attended tokens incurs minimal performance loss ($<7\%$). This rigorously validates that the Transformer's self-attention mechanism attends faithfully to discriminative emotion-bearing keywords.
+The token importance ablation experiment confirms that masking the top-attended tokens causes a rapid degradation in classification accuracy (dropping from 100\% down to 62.20\% at $k=1$, 54.20\% at $k=2$, and 52.60\% at $k=3$), whereas masking random tokens (93.33\%, 88.00\%, 82.13\%) or bottom-attended tokens (97.40\%, 95.40\%, 93.80\%) preserves high classification accuracy. This rigorously validates that the Transformer's self-attention mechanism attends faithfully to discriminative emotion-bearing keywords.
 
 \subsection{Phase 8: Comprehensive Benchmarking \& Robustness}
 Table \ref{tab:phase8} summarizes the final model comparison across all target evaluation dimensions.
@@ -300,16 +300,16 @@ Table \ref{tab:phase8} summarizes the final model comparison across all target e
 \toprule
 \textbf{Model} & \textbf{Acc} & \textbf{F1} & \textbf{Params} & \textbf{Latency} & \textbf{Size} \\
 \midrule
-Simple RNN   & 0.4285 & 0.3210 & 1,276,444 & 9.4 ms  & 4.87 MB \\
-LSTM (Bi-Avg)& 0.4891 & 0.4012 & 1,492,060 & 25.1 ms & 5.69 MB \\
-GRU          & 0.4815 & 0.3920 & 1,332,380 & 12.8 ms & 5.08 MB \\
-Transformer  & \textbf{0.5085} & \textbf{0.4182} & 1,353,244 & 18.2 ms & 5.16 MB \\
+Simple RNN   & 0.3499 & 0.0185 & 1,276,052 & 7.27 ms  & 4.87 MB \\
+LSTM         & \textbf{0.5222} & \textbf{0.3288} & 1,364,372 & 8.80 ms  & 5.21 MB \\
+GRU          & 0.5198 & 0.2488 & 1,334,932 & 23.03 ms & 5.09 MB \\
+Transformer  & 0.4821 & 0.2649 & 1,430,740 & 28.18 ms & 5.46 MB \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \paragraph{Statistical Significance Test}:
-A two-sided McNemar's test with continuity correction was conducted between the best recurrent model (Bidirectional LSTM) and the scratch Transformer on the 4,590 test samples. The contingency matrix yielded $b=312$ (LSTM correct, Transformer wrong) and $c=401$ (LSTM wrong, Transformer correct), resulting in $\chi^2 = 10.84$ ($p = 0.00099$). Because $p < 0.001$, the superiority of the Transformer architecture is statistically significant.
+A two-sided McNemar's test with continuity correction was conducted between the best recurrent model (LSTM) and the scratch Transformer on the 4,590 test samples. The contingency matrix yielded $\chi^2 = 50.2838$ ($p = 1.33 \times 10^{-12} \ll 0.001$). Because $p < 0.001$, the performance difference between the recurrent and self-attention paradigms is statistically significant.
 
 \begin{figure}[H]
     \centering
