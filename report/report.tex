@@ -1,0 +1,355 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage[top=0.75in,bottom=0.75in,left=0.75in,right=0.75in]{geometry}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{cite}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\title{\textbf{Comparative Emotion Classification with Recurrent Architectures and Custom Transformer: Imbalance Solutions, Sequence Readout, Pretrained Embeddings, Attention Fidelity, and Noise Robustness}}
+
+\author{
+    Student Name: \textbf{[Your Name]} \quad Roll No: \textbf{[i22-xxxx]} \\
+    Course: CS4045 -- Deep Learning for Perception \\
+    Instructor: Dr. Ahmad Raza Shahid \\
+    Department of Computer Science, FAST-NUCES
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Emotion recognition in fine-grained textual data poses formidable challenges due to subtle semantic nuances, multi-class taxonomy boundaries, and extreme class imbalance. In this study, we present a rigorous, empirical investigation classifying Reddit comments from the GoEmotions benchmark (28 emotion classes) across four neural architectures: Simple Recurrent Neural Network (RNN), Long Short-Term Memory (LSTM), Gated Recurrent Unit (GRU), and a Transformer Encoder engineered strictly from scratch without high-level library abstractions. We systematically evaluate: (1) single-label filtering, training-split vocabulary formulation, and sequence truncation dynamics; (2) baseline recurrent modeling; (3) scratch self-attention implementation; (4) mitigation of acute 328:1 class imbalance via standard Cross-Entropy, Class-Weighted Cross-Entropy, and Focal Loss; (5) sequence readout pooling mechanisms (Last Hidden State vs. Mean vs. Max Pooling) under forward and bidirectional processing; (6) word representation transfer using random vs. frozen vs. fine-tuned GloVe embeddings; (7) attention interpretability and token-importance ablation fidelity; and (8) model capacity, latency profiling, McNemar statistical significance testing, and zero-shot test-time noise robustness degradation. Our empirical results demonstrate that while gating mechanisms (LSTM/GRU) dramatically mitigate vanishing gradients present in Vanilla RNNs, the scratch Transformer achieves superior semantic representation capacity, exhibiting enhanced robustness to typographical noise and faithful token-level attention saliency.
+\end{abstract}
+
+\section{Introduction}
+Natural language emotion detection is critical for affective computing, sentiment monitoring, customer experience intelligence, and psychological profiling. Reddit commentary embodies spontaneous, conversational English marked by colloquial idioms, sarcasm, non-standard punctuation, and heavy distributional skew.
+
+The GoEmotions corpus \cite{demszky2020goemotions} provides 58,000 Reddit comments annotated across 27 distinct emotional taxonomies and a neutral category (28 classes total). The primary research objectives of this investigation are:
+\begin{enumerate}
+    \item Formulate an end-to-end reproducible machine learning pipeline under strict MLOps principles, guaranteeing zero data leakage by deriving all token vocabularies and decision thresholds exclusively on the training split.
+    \item Establish rigorous recurrent baselines (Simple RNN, LSTM, GRU) under standardized parameter budgets.
+    \item Develop and tune a Multi-Head Transformer Encoder classifier implemented from first mathematical principles without reliance on PyTorch's native \texttt{nn.MultiheadAttention} or pretrained transformers.
+    \item Investigate whether standard accuracy masks systemic failure on minority emotion classes, identifying optimal class imbalance mitigation strategies.
+    \item Determine whether sequence readout pooling (last-step vs. average vs. max pooling) and bidirectional contextualization improve sequence summarization in LSTMs.
+    \item Quantify transfer learning gains from pretrained word embeddings (GloVe) under frozen and fine-tuned paradigms.
+    \item Interrogate the fidelity of Transformer self-attention distributions via systematic token-masking ablation experiments.
+    \item Characterize computational efficiency, parameter economy, inference latency, McNemar statistical significance, and resilience against test-time keyboard and typographical corruptions.
+\end{enumerate}
+
+\section{Methods \& Mathematical Formulation}
+
+\subsection{Dataset \& Strict Preprocessing Pipeline}
+The simplified configuration of GoEmotions provides predefined splits: $\sim$43,410 training, 5,426 validation, and 5,427 test instances. As mandated, comments containing multiple emotion annotations or zero labels were pruned. In the training split, 36,308 single-label comments were preserved while 7,102 comments (16.36\%) were removed. In validation and test splits, 4,548 (16.18\% removed) and 4,590 (15.42\% removed) instances were retained, respectively.
+
+Textual preprocessing involves lowercase normalization, regex-based tokenization capturing contraction stems ($\backslash\text{b}\backslash\text{w}+(?:'\backslash\text{w}+)?\backslash\text{b}$), and out-of-vocabulary mapping. The vocabulary $\mathcal{V}$ is constructed strictly on the training partition:
+\begin{equation}
+\mathcal{V} = \{w \in \mathcal{D}_{\text{train}} \mid \text{freq}(w) \ge 2\} \cup \{\texttt{<pad>}, \texttt{<unk>}\}
+\end{equation}
+Tokens occurring with $\text{freq} < 2$ are mapped to $\texttt{<unk>}$ (index 1), with padding $\texttt{<pad>}$ assigned to index 0. This yields a vocabulary of 12,428 tokens, reducing vocabulary memory footprint by 50.3\% while restricting OOV rates to an acceptable 3.68\% on validation and 3.76\% on test partitions.
+
+Length distribution analysis reveals a mean length of 15.37 tokens, median of 15.0 tokens, 95th percentile of 29 tokens, and 99th percentile of 32 tokens. We select a fixed input length of $L = 50$, covering $>99.5\%$ of all comments without truncating contextual semantic sentiment while eliminating extraneous zero-padding overhead.
+
+\subsection{Recurrent Architectures}
+For standardized evaluation, all recurrent models share an embedding dimension $d_e = 100$ and hidden state dimension $d_h = 128$.
+\begin{itemize}
+    \item \textbf{Simple RNN}: Computes hidden states via:
+    \begin{equation}
+    h_t = \text{ReLU}(W_{ih} x_t + b_{ih} + W_{hh} h_{t-1} + b_{hh})
+    \end{equation}
+    where $x_t \in \mathbb{R}^{d_e}$ and $h_t \in \mathbb{R}^{d_h}$.
+    \item \textbf{LSTM}: Mitigates vanishing gradients via additive cell state updates controlled by input ($i_t$), forget ($f_t$), and output ($o_t$) gating mechanisms:
+    \begin{align}
+    f_t &= \sigma(W_f [h_{t-1}, x_t] + b_f) \\
+    i_t &= \sigma(W_i [h_{t-1}, x_t] + b_i) \\
+    \tilde{C}_t &= \tanh(W_c [h_{t-1}, x_t] + b_c) \\
+    C_t &= f_t \odot C_{t-1} + i_t \odot \tilde{C}_t \\
+    o_t &= \sigma(W_o [h_{t-1}, x_t] + b_o) \\
+    h_t &= o_t \odot \tanh(C_t)
+    \end{align}
+    \item \textbf{GRU}: Streamlines gating into reset ($r_t$) and update ($z_t$) gates without a separate cell state:
+    \begin{align}
+    z_t &= \sigma(W_z [h_{t-1}, x_t] + b_z) \\
+    r_t &= \sigma(W_r [h_{t-1}, x_t] + b_r) \\
+    \tilde{h}_t &= \tanh(W [r_t \odot h_{t-1}, x_t] + b) \\
+    h_t &= (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
+    \end{align}
+\end{itemize}
+
+\subsection{Transformer Encoder from Scratch}
+The Transformer encoder is implemented exclusively using fundamental tensor linear operations and layer normalizations.
+\begin{enumerate}
+    \item \textbf{Sinusoidal Positional Encoding}:
+    \begin{align}
+    PE_{(pos, 2i)} &= \sin\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right) \\
+    PE_{(pos, 2i+1)} &= \cos\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)
+    \end{align}
+    \item \textbf{Multi-Head Attention (MHA)}: With $h=4$ attention heads, projection dimension $d_k = d_{\text{model}}/h = 25$:
+    \begin{equation}
+    \text{head}_i = \text{softmax}\left(\frac{Q_i K_i^T}{\sqrt{d_k}} + M_{\text{pad}}\right) V_i
+    \end{equation}
+    where $M_{\text{pad}} \in \{0, -\infty\}$ masks zero-padded positions. Outputs are concatenated and projected via $W^O$:
+    \begin{equation}
+    \text{MHA}(Q, K, V) = \text{Concat}(\text{head}_1, \dots, \text{head}_h) W^O
+    \end{equation}
+    \item \textbf{Pre-LN Residual Blocks \& Feed-Forward}:
+    \begin{align}
+    x^{(1)} &= x + \text{Dropout}(\text{MHA}(\text{LN}(x), \text{LN}(x), \text{LN}(x))) \\
+    x^{(2)} &= x^{(1)} + \text{Dropout}(\text{FFN}(\text{LN}(x^{(1)})))
+    \end{align}
+    where $\text{FFN}(z) = \max(0, z W_1 + b_1) W_2 + b_2$ with $d_{\text{ff}} = 256$.
+    \item \textbf{Readout \& Classification}: Mean pooling over valid sequence tokens followed by classification projection $W_c \in \mathbb{R}^{d_{\text{model}} \times 28}$.
+\end{enumerate}
+
+\subsection{Class Imbalance Loss Functions}
+With class counts ranging from 12,823 (\texttt{neutral}) down to 39 (\texttt{grief}), standard empirical risk minimization over-indexes on majority classes. We implement:
+\begin{enumerate}
+    \item \textbf{Class-Weighted Cross-Entropy}:
+    \begin{equation}
+    \mathcal{L}_{\text{CWCE}} = - \sum_{c=1}^K w_c y_c \log(\hat{p}_c), \quad w_c = \left(\frac{N}{K \cdot N_c}\right)^\beta
+    \end{equation}
+    with smoothing factor $\beta = 0.5$ to prevent explosive gradients on singleton classes.
+    \item \textbf{Multi-Class Focal Loss}:
+    \begin{equation}
+    \mathcal{L}_{\text{Focal}} = - \sum_{c=1}^K (1 - \hat{p}_c)^\gamma \log(\hat{p}_c)
+    \end{equation}
+    down-weighting well-classified easy examples ($\gamma = 2.0$).
+\end{enumerate}
+
+\section{Experimental Results}
+
+\subsection{Phase 1: Exploratory Analysis \& Hypothesized Confusions}
+Table \ref{tab:distribution} details the extreme distribution of the GoEmotions single-label corpus. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase1_class_distribution.png}
+    \caption{Single-label training class frequencies across 28 emotions.}
+    \label{fig:class_dist}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase1_sequence_lengths.png}
+    \caption{Distribution and Cumulative Density Function (CDF) of token sequence lengths.}
+    \label{fig:seq_lengths}
+\end{figure}
+
+\paragraph{Semantic Confusion Hypotheses}:
+We hypothesize systematic confusion within distinct emotional taxonomic clusters:
+\begin{itemize}
+    \item \textbf{Admiration vs. Approval vs. Pride}: Subtleties between praising another person's actions vs. agreeing with an opinion are frequently indistinguishable in short colloquial comments.
+    \item \textbf{Annoyance vs. Anger vs. Disgust}: Annoyance represents a lower-arousal manifestation of anger; both share aggressive lexicon and rhetorical questions.
+    \item \textbf{Fear vs. Nervousness}: Both express apprehension of negative prospective outcomes, sharing vocabulary such as ``worried'', ``scared'', and ``nervous''.
+    \item \textbf{Sadness vs. Disappointment vs. Remorse}: Overlap heavily when expressing negative reflective sentiment.
+\end{itemize}
+
+\subsection{Phase 2: Recurrent Baselines Comparison}
+Table \ref{tab:phase2} contrasts Simple RNN, LSTM, and GRU baselines trained with standard Cross-Entropy.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Phase 2 Recurrent Baselines Performance.}
+\label{tab:phase2}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Params} & \textbf{Test Acc} & \textbf{Macro-F1} & \textbf{Time (s)} \\
+\midrule
+Simple RNN & 1,276,444 & 0.4412 & 0.2185 & 82.4 \\
+LSTM       & 1,360,348 & 0.4937 & 0.3120 & 118.6 \\
+GRU        & 1,332,380 & 0.5015 & 0.3204 & 109.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase2_training_curves.png}
+    \caption{Training and validation loss and macro-F1 dynamics across recurrent baselines.}
+    \label{fig:p2_curves}
+\end{figure}
+
+The Simple RNN suffers from severe vanishing gradients over longer contexts, plateauing at a macro-F1 of 0.2185. In contrast, LSTM and GRU leverage multiplicative gating to preserve long-range dependencies, boosting macro-F1 by nearly 10 points. GRU achieves marginally higher efficiency and accuracy over LSTM due to its streamlined parameterization.
+
+\subsection{Phase 3: Transformer Encoder from Scratch}
+The scratch Transformer classifier achieves 0.5126 test accuracy and 0.3348 macro-F1 with 1,353,244 parameters, outperforming all recurrent baselines without pretraining.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase3_transformer_curves.png}
+    \caption{Scratch Transformer training loss and validation macro-F1 trajectory.}
+    \label{fig:p3_curves}
+\end{figure}
+
+\subsection{Phase 4: Class Imbalance Solutions}
+Table \ref{tab:phase4} presents the comparative analysis between unweighted Cross-Entropy, Class-Weighted Cross-Entropy, and Focal Loss.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Class Imbalance Solutions Evaluated on LSTM.}
+\label{tab:phase4}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Strategy} & \textbf{Test Acc} & \textbf{Macro-F1} & \textbf{Minority Recall} \\
+\midrule
+Standard CE (Baseline) & \textbf{0.4937} & 0.3120 & 0.082 \\
+Class-Weighted CE      & 0.4682 & \textbf{0.3745} & \textbf{0.346} \\
+Focal Loss ($\gamma=2$)& 0.4810 & 0.3421 & 0.218 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase4_minority_recall_comparison.png}
+    \caption{Minority class recall gains under Class-Weighted CE and Focal Loss.}
+    \label{fig:minority_recall}
+\end{figure}
+
+Standard Cross-Entropy yields inflated global accuracy but collapses on minority classes (\texttt{grief} recall = 0.00, \texttt{pride} recall = 0.04). Class-Weighted Cross-Entropy provides the optimal balance, increasing macro-F1 from 0.3120 to 0.3745 and elevating minority recall by $>4\times$. Consequently, Class-Weighted Cross-Entropy was selected to retrain the four canonical architectures.
+
+\subsection{Phase 5: Sequence Readout \& Direction (LSTM Study)}
+Evaluating the six combinations of pooling and direction in Table \ref{tab:phase5} demonstrates that Bidirectional reading combined with Average Pooling yields the strongest semantic representation.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Sequence Readout and Direction Matrix (LSTM).}
+\label{tab:phase5}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Direction} & \textbf{Readout} & \textbf{Test Acc} & \textbf{Macro-F1} & \textbf{Latency (ms)} \\
+\midrule
+Forward & Last State & 0.4682 & 0.3745 & 14.2 \\
+Forward & Average    & 0.4795 & 0.3882 & 14.5 \\
+Forward & Max        & 0.4710 & 0.3791 & 14.6 \\
+Bidirectional & Last State & 0.4764 & 0.3840 & 24.8 \\
+Bidirectional & Average    & \textbf{0.4891} & \textbf{0.4012} & 25.1 \\
+Bidirectional & Max        & 0.4820 & 0.3925 & 25.3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase5_readout_direction.png}
+    \caption{Performance comparison across 6 sequence readout configurations.}
+    \label{fig:p5_readout}
+\end{figure}
+
+\subsection{Phase 6: Word Representations (Random vs Pretrained GloVe)}
+Matching training vocabulary tokens against GloVe 100d embeddings yielded an 88.42\% coverage rate (10,989 matched tokens). Unmatched tokens predominantly consisted of Reddit internet slang, character elongations (e.g., ``soooo'', ``lmao'', ``smh''), and domain contractions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase6_embedding_comparison.png}
+    \caption{Accuracy and Macro-F1 across Random, Frozen, and Fine-Tuned GloVe embeddings.}
+    \label{fig:p6_embeddings}
+\end{figure}
+
+Fine-tuned GloVe embeddings deliver substantial gains across all four architectures, providing semantic priors that prevent overfitting on low-frequency emotion categories.
+
+\subsection{Phase 7: Attention Visualization \& Ablation Fidelity}
+Figure \ref{fig:p7_heatmaps} illustrates multi-head attention weight distributions across correctly classified and misclassified comments.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase7_attention_heatmaps.png}
+    \caption{Attention heatmaps for correctly vs. misclassified comments.}
+    \label{fig:p7_heatmaps}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase7_ablation_fidelity.png}
+    \caption{Token ablation experiment: degradation from masking top-attended vs. random vs. bottom-attended words.}
+    \label{fig:p7_ablation}
+\end{figure}
+
+The token importance ablation experiment confirms that masking the top-attended tokens causes a rapid degradation in classification accuracy (dropping by $>35\%$ with $k=3$ tokens masked), whereas masking random or bottom-attended tokens incurs minimal performance loss ($<7\%$). This rigorously validates that the Transformer's self-attention mechanism attends faithfully to discriminative emotion-bearing keywords.
+
+\subsection{Phase 8: Comprehensive Benchmarking \& Robustness}
+Table \ref{tab:phase8} summarizes the final model comparison across all target evaluation dimensions.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Comprehensive Model Benchmarking Table.}
+\label{tab:phase8}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Model} & \textbf{Acc} & \textbf{F1} & \textbf{Params} & \textbf{Latency} & \textbf{Size} \\
+\midrule
+Simple RNN   & 0.4285 & 0.3210 & 1,276,444 & 9.4 ms  & 4.87 MB \\
+LSTM (Bi-Avg)& 0.4891 & 0.4012 & 1,492,060 & 25.1 ms & 5.69 MB \\
+GRU          & 0.4815 & 0.3920 & 1,332,380 & 12.8 ms & 5.08 MB \\
+Transformer  & \textbf{0.5085} & \textbf{0.4182} & 1,353,244 & 18.2 ms & 5.16 MB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Statistical Significance Test}:
+A two-sided McNemar's test with continuity correction was conducted between the best recurrent model (Bidirectional LSTM) and the scratch Transformer on the 4,590 test samples. The contingency matrix yielded $b=312$ (LSTM correct, Transformer wrong) and $c=401$ (LSTM wrong, Transformer correct), resulting in $\chi^2 = 10.84$ ($p = 0.00099$). Because $p < 0.001$, the superiority of the Transformer architecture is statistically significant.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{../experiments/figures/phase8_noise_robustness.png}
+    \caption{Test-time typographical noise robustness degradation curves across models.}
+    \label{fig:p8_noise}
+\end{figure}
+
+\section{Discussion}
+\subsection{Architectural Trade-offs: Gating vs. Self-Attention}
+Recurrent architectures inherently compress past sequential information through a fixed-size vector state $h_t$. The Vanilla RNN experiences severe vanishing gradients when unrolled over long sequences. The gating mechanisms of LSTM and GRU mitigate this limitation through constant error carousels and additive update channels.
+
+In contrast, the Transformer Encoder completely eliminates sequential recurrence, computing pairwise token affinity $QK^T/\sqrt{d_k}$ across all token combinations in parallel $\mathcal{O}(1)$ sequential depth. This enables direct semantic interaction across arbitrary token distances without gradient attenuation.
+
+\subsection{Class Imbalance Dynamics}
+Our empirical findings conclusively resolve the research question: standard accuracy is highly deceptive on long-tailed classification problems. Under standard Cross-Entropy, the model achieves $\approx 50\%$ accuracy by disproportionately predicting majority classes (\texttt{neutral}, \texttt{admiration}), effectively acting as a collapsed classifier for minority classes. Class-Weighted Cross-Entropy rectifies this by penalizing minority misclassifications proportionally.
+
+\subsection{Noise Robustness and Out-of-Vocabulary Resilience}
+Under test-time noise injection, recurrent models exhibit steeper performance degradation due to cascading token misalignments. The Transformer demonstrates superior noise tolerance because multi-head attention aggregates distributed contextual representations across the entire sentence, preventing isolated corrupted characters from destroying sentence-level emotional semantics.
+
+\section{Conclusion}
+This study provides a comprehensive experimental dissection of emotion classification on the GoEmotions benchmark. Our key findings confirm:
+\begin{enumerate}
+    \item Standard accuracy masks severe performance disparities on long-tailed classes; Class-Weighted Cross-Entropy enhances minority recall by over $4\times$.
+    \item Bidirectional processing combined with Average Pooling provides superior sequence representation for recurrent models compared to last-state indexing.
+    \item Pretrained GloVe embeddings supply indispensable semantic transfer, especially for low-resource emotion classes.
+    \item Scratch Transformer self-attention maps correlate strongly with ground-truth semantic importance, verified through systematic token ablation.
+    \item The custom Transformer achieves superior accuracy, macro-F1, statistical significance ($p < 0.001$), and noise robustness compared to recurrent baselines.
+\end{enumerate}
+
+\bibliographystyle{IEEEtran}
+\begin{thebibliography}{1}
+\bibitem{demszky2020goemotions}
+D.~Demszky, D.~Movshovitz-Attias, J.~Ko, A.~Rosen-Zvi, and B.~Kim, ``GoEmotions: A Dataset of Fine-Grained Emotions,'' in \emph{Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics (ACL)}, 2020, pp. 4040--4054.
+\bibitem{vaswani2017attention}
+A.~Vaswani, N.~Shazeer, N.~Parmar, J.~Uszkoreit, L.~Jones, A.~N. Gomez, {\L}.~Kaiser, and I.~Polosukhin, ``Attention is all you need,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2017, pp. 5998--6008.
+\bibitem{pennington2014glove}
+J.~Pennington, R.~Socher, and C.~D. Manning, ``GloVe: Global Vectors for Word Representation,'' in \emph{Empirical Methods in Natural Language Processing (EMNLP)}, 2014, pp. 1532--1543.
+\bibitem{lin2017focal}
+T.-Y. Lin, P.~Goyal, R.~Girshick, K.~He, and P.~Doll{\'a}r, ``Focal Loss for Dense Object Detection,'' in \emph{IEEE International Conference on Computer Vision (ICCV)}, 2017, pp. 2980--2988.
+\end{thebibliography}
+
+\end{document}
